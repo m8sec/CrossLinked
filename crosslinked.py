@@ -175,11 +175,12 @@ def main(args):
     print("[+] {}.txt complete, {} unique names found!".format(args.outfile, len(found_names)))
 
 if __name__ == '__main__':
+    VERSION = "0.0.1"
     args = argparse.ArgumentParser(description="", formatter_class=argparse.RawTextHelpFormatter, usage=argparse.SUPPRESS)
     args.add_argument('--debug', dest="debug", action='store_true',help=argparse.SUPPRESS)
     args.add_argument('-t', dest='timeout', type=int, default=25,help='Timeout [seconds] for search threads (Default: 25)')
     args.add_argument('-j', dest='jitter', type=float, default=0,help='Jitter for scraping evasion (Default: 0)')
-    args.add_argument('-o', dest='outfile', type=str, default='names.txt',help='Change name of output file (default: users.txt')
+    args.add_argument('-o', dest='outfile', type=str, default='names.txt',help='Change name of output file (default: names.txt')
     args.add_argument('-f', dest='nformat', type=str, required=True, help='Format names, ex: \'domain\{f}{last}\', \'{first}.{last}@domain.com\'')
     args.add_argument('-v', dest="verbose", action='store_true', help="Show names and titles recovered after enumeration")
     args.add_argument(dest='domain', nargs='+', help='Target domain')
