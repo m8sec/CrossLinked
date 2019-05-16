@@ -225,9 +225,8 @@ def main():
             tmp.append(pwd)
             openFile.write("{}\n".format(pwd))
     openFile.close()
-
-    #Signal End
     print("\n[+] Password list created: {}\n".format(outfile))
 
 if __name__ == '__main__':
+    VERSION = "0.0.1"
     main()
