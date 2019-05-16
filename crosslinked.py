@@ -73,6 +73,8 @@ class ScrapeEngine():
         sleep(jitter)
 
     def extract_linkedin(self, link):
+        if debug:
+            print("[*] Parsing Linkedin User: {}".format(link.text))
         try:
             x = link.text.split("|")[0]
             x = x.split("...")[0]
