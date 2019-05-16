@@ -20,11 +20,13 @@ python3 crosslinked.py -f 'domain\{f}{last}' -t 45 -j 0.5 company_name
 
 ## Usage
 ```
-  -t TIMEOUT  Timeout [seconds] for search threads (Default: 25)
-  -j JITTER   Jitter for scraping evasion (Default: 0)
-  -o OUTFILE  Change name of output file (default: users.txt
-  -f NFORMAT  Format names, ex: 'domain\{f}{last}', '{first}.{last}@domain.com'
-  -v          Show names and titles recovered after enumeration
+  -h, --help    show this help message and exit
+  -t TIMEOUT    Timeout [seconds] for search threads (Default: 25)
+  -j JITTER     Jitter for scraping evasion (Default: 0)
+  -o OUTFILE    Change name of output file (default: names.txt
+  -f NFORMAT    Format names, ex: 'domain\{f}{last}', '{first}.{last}@domain.com'
+  -s, --safe    Only parse names with company in title (Reduces false positives)
+  -v            Show names and titles recovered after enumeration
 ```
 
 ## Additions

@@ -30,7 +30,7 @@ class ScrapeEngine():
         sleep(time)
         self.running = False
 
-    def search(self, search_engine, domain, timeout, jitter):
+    def search(self, search_engine, company_name, timeout, jitter):
         self.running = True  # Define search as "running" after init(), not used in DNS_Enum
 
         Thread(target=self.timer, args=(timeout,), daemon=True).start()  # Start timeout thread
@@ -45,7 +45,7 @@ class ScrapeEngine():
                 return self.linkedin
             found_names = self.name_count
             try:
-                self.name_search(search_engine, self.search_links, domain, jitter)
+                self.name_search(search_engine, self.search_links, company_name, jitter)
             except KeyboardInterrupt:
                 print("[!] Key event detected, closing...")
                 exit(0)
@@ -54,12 +54,12 @@ class ScrapeEngine():
                     print("[!] Debug: {}".format(str(e)))
         return self.linkedin
 
-    def name_search(self, search_engine, count, domain, jitter):
+    def name_search(self, search_engine, count, company_name, jitter):
         # Regex to extract link
-        HTTP = compile("http([^\)]+){}([^\)]+)".format(domain))
-        HTTPS = compile("https([^\)]+){}([^\)]+)".format(domain))
+        HTTP = compile("http([^\)]+){}([^\)]+)".format(company_name))
+        HTTPS = compile("https([^\)]+){}([^\)]+)".format(company_name))
         # Search for links in HTML
-        url = self.URL[search_engine].format(domain, count)
+        url = self.URL[search_engine].format(company_name, count)
         print("[*] {} : {}".format(self.name_count, url))
 
         for link in get_links(get_request(url, 3)):
@@ -68,13 +68,15 @@ class ScrapeEngine():
             # Identify LinkedIn data and parse names
             if (search_engine+".com") not in url and not url.startswith("/"):
                 self.search_links += 1
-                if "linkedin.com/in" in url and self.extract_linkedin(link) :
+                if "linkedin.com/in" in url and self.extract_linkedin(link, company_name) :
                     self.name_count += 1
         sleep(jitter)
 
-    def extract_linkedin(self, link):
+    def extract_linkedin(self, link, company_name):
         if debug:
             print("[*] Parsing Linkedin User: {}".format(link.text))
+        if safe and company_name.lower() not in link.text.lower():
+            return False
         try:
             x = link.text.split("|")[0]
             x = x.split("...")[0]
@@ -159,8 +161,8 @@ def main(args):
     found_names = {}
     search = ['google', 'bing']
     for site in search:
-        print("[*] Searching {} for valid employee names".format(site))
-        lkin = ScrapeEngine().search(site, args.domain, args.timeout, args.jitter)
+        print("[*] Searching {} for valid employee names at {}".format(site, args.company_name))
+        lkin = ScrapeEngine().search(site, args.company_name, args.timeout, args.jitter)
         if lkin:
             for name, data in lkin.items():
                 try:
@@ -177,20 +179,22 @@ def main(args):
     print("[+] {}.txt complete, {} unique names found!".format(args.outfile, len(found_names)))
 
 if __name__ == '__main__':
-    VERSION = "0.0.2"
+    VERSION = "0.0.3"
     args = argparse.ArgumentParser(description="", formatter_class=argparse.RawTextHelpFormatter, usage=argparse.SUPPRESS)
     args.add_argument('--debug', dest="debug", action='store_true',help=argparse.SUPPRESS)
     args.add_argument('-t', dest='timeout', type=int, default=25,help='Timeout [seconds] for search threads (Default: 25)')
     args.add_argument('-j', dest='jitter', type=float, default=0,help='Jitter for scraping evasion (Default: 0)')
     args.add_argument('-o', dest='outfile', type=str, default='names.txt',help='Change name of output file (default: names.txt')
     args.add_argument('-f', dest='nformat', type=str, required=True, help='Format names, ex: \'domain\{f}{last}\', \'{first}.{last}@domain.com\'')
+    args.add_argument('-s', "--safe", dest="safe", action='store_true',help="Only parse names with company in title (Reduces false positives)")
     args.add_argument('-v', dest="verbose", action='store_true', help="Show names and titles recovered after enumeration")
-    args.add_argument(dest='domain', nargs='+', help='Target domain')
+    args.add_argument(dest='company_name', nargs='+', help='Target company name')
     args = args.parse_args()
 
     outfile = args.outfile
+    safe = args.safe
     debug = args.debug
-    args.domain = args.domain[0]
+    args.company_name = args.company_name[0]
 
     try:
         main(args)
