@@ -155,7 +155,7 @@ def email_formatter(nformat, first, last):
 
 def main(args):
     found_names = {}
-    search = ['bing']
+    search = ['google', 'bing']
     for site in search:
         print("[*] Searching {} for valid employee names".format(site))
         lkin = ScrapeEngine().search(site, args.domain, args.timeout, args.jitter)
@@ -175,7 +175,7 @@ def main(args):
     print("[+] {}.txt complete, {} unique names found!".format(args.outfile, len(found_names)))
 
 if __name__ == '__main__':
-    VERSION = "0.0.1"
+    VERSION = "0.0.2"
     args = argparse.ArgumentParser(description="", formatter_class=argparse.RawTextHelpFormatter, usage=argparse.SUPPRESS)
     args.add_argument('--debug', dest="debug", action='store_true',help=argparse.SUPPRESS)
     args.add_argument('-t', dest='timeout', type=int, default=25,help='Timeout [seconds] for search threads (Default: 25)')
