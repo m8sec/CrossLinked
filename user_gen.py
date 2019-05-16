@@ -35,6 +35,7 @@ def file_exists(parser, filename):
     return [x.strip() for x in open(filename)]
 
 if __name__ == '__main__':
+    VERSION = "0.0.1"
     args = argparse.ArgumentParser(description="", formatter_class=argparse.RawTextHelpFormatter, usage=argparse.SUPPRESS)
     args.add_argument('-first', dest='first', default=False, type=lambda x: file_exists(args, x), help='txt file of first names')
     args.add_argument('-last', dest='last', default=False, type=lambda x: file_exists(args, x),help='txt file of last names')
