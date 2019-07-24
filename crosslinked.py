@@ -9,8 +9,16 @@ from requests import get
 from random import choice
 from threading import Thread
 from bs4 import BeautifulSoup
-from urllib3 import disable_warnings, exceptions
-disable_warnings(exceptions.InsecureRequestWarning)
+# Disable to execute in kali linux
+#from urllib3 import disable_warnings, exceptions     #<<<<
+#disable_warnings(exceptions.InsecureRequestWarning)  #<<<<
+
+# Add for execute script in kali linux
+import requests                                                                                        
+requests.packages.urllib3.disable_warnings()
+
+
+
 
 USER_AGENTS = [line.strip() for line in open('user_agents.txt')]
 
