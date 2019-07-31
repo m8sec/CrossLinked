@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-# Author: @m8r0wn
 
 import argparse
+import requests
 from sys import exit
 from time import sleep
-from re import compile
-from requests import get
 from random import choice
 from threading import Thread
 from bs4 import BeautifulSoup
-from urllib3 import disable_warnings, exceptions
-disable_warnings(exceptions.InsecureRequestWarning)
+requests.packages.urllib3.disable_warnings()
 
 USER_AGENTS = [line.strip() for line in open('user_agents.txt')]
 
@@ -55,9 +52,6 @@ class ScrapeEngine():
         return self.linkedin
 
     def name_search(self, search_engine, count, company_name, jitter):
-        # Regex to extract link
-        HTTP = compile("http([^\)]+){}([^\)]+)".format(company_name))
-        HTTPS = compile("https([^\)]+){}([^\)]+)".format(company_name))
         # Search for links in HTML
         url = self.URL[search_engine].format(company_name, count)
         print("[*] {} : {}".format(self.name_count, url))
@@ -144,7 +138,7 @@ def get_request(link, timeout):
         'DNT': '1',
         'Connection': 'keep-alive',
         'Upgrade-Insecure-Requests': '1'}
-    return get(link, headers=head, verify=False, timeout=timeout)
+    return requests.get(link, headers=head, verify=False, timeout=timeout)
 
 def email_formatter(nformat, first, last):
     name = nformat
