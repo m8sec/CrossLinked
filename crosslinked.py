@@ -173,7 +173,7 @@ def main(args):
     print("[+] {} complete, {} unique names found!".format(args.outfile, len(found_names)))
 
 if __name__ == '__main__':
-    VERSION = "0.0.4"
+    VERSION = "0.0.5"
     args = argparse.ArgumentParser(description="", formatter_class=argparse.RawTextHelpFormatter, usage=argparse.SUPPRESS)
     args.add_argument('--debug', dest="debug", action='store_true',help=argparse.SUPPRESS)
     args.add_argument('-t', dest='timeout', type=int, default=25,help='Timeout [seconds] for search threads (Default: 25)')
