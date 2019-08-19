@@ -1,232 +1,173 @@
 #!/usr/bin/env python3
 # Author: @m8r0wn
 
-# outfile
+# Output file location/name.txt
 outfile = 'passwords.txt'
 
 # Base words: company, first names, last names, etc (lowercase)
-base = ['password','welcome','spring','summer','winter','fall','administrator','admin', ]
+base = ['guest', 'password', 'welcome', 'admin', 'administrator', 'fall', 'winter', 'spring', 'summer']
 
-# Combine words in base list and proceed to append/prepend
-blend = False
+# Prepend lowercase words, numbers, symbols, etc
+prepend_chars = ['!', '#', '$', '@', '1']
 
-# Prepend values (lowercase) (ex. google, google_, google-)
-prepend_words = []
-prepend_chars = []
+# Append lowercase words, numbers, symbols, etc
+append_chars = ['!', '#', '$', '@', '1', '2', '3', '00', '01', '#1', '19', '!19', '2019', '2019!', '#2019', '!2019',
+                '123', '19!', '!!', '69', '666', '2018', '2018!']
 
-# Append values (lowercase) (ex. google, _google, -google)
-append_words = []
-append_chars = ['$', '!','1!', '123', '#1', '123!', '!1', '1', '2019', '2019!']
+# Combine select words with base words (welcome2company)
+combine = ['welcome', 'guest', 'admin', 'password']
 
-# L3tt3r/Ch4r Subst1tut10n on base words
+# Chars to connect two words (ex: welcome2company)
+connecting_chars = ['@', '2']
+
+# L3tt3r/Ch4r Subst1tut10n
 substitution = True
-
-# Perform substitution on word combinations from append_words & base
-combine = False
-
 ########################################################################
+from os import path, remove
+from sys import exit
+
+def outfile_prep():
+    # check if file exists and prompt user to delete
+    if path.exists(outfile):
+        print("[!] Output file '{}' already exists".format(outfile))
+        delete_old = input("[*] Do you want to delete and continue? [y/N]: ")
+        if delete_old.strip() not in ['y', 'Y']:
+            exit(0)
+        remove(outfile)
+
 def main():
-    basemod = []                #Main base modification list
-    basemod_append_words = []   #Temp list for base mod + append_chars for substitution
+    basemod = []  
+    outfile_prep()
+    print('\n[*] Generating password combinations')
 
-    #Start word modification
-    for x in base:
-        basemod.append(x)
-        basemod.append(x.upper())
-        basemod.append(x.title())
-        if blend:
-            for y in reversed(base):
-                if y != x:
-                    basemod.append(x+y)
-                    basemod.append(x.title()+y)
-                    basemod.append(x + y.title())
-                    basemod.append(x.upper() + y.upper())
-                    basemod.append(x.title() + y.title())
+    basemod2 = []
+    if substitution:
+        word_lists = [combine, base]
+        for word_list in word_lists:
+            for x in word_list:
+                basemod2.append(x.replace('o', '0'))
+                basemod2.append(x.replace('a', '4'))
+                basemod2.append(x.replace('a', '@'))
+                basemod2.append(x.replace('l', '1'))
+                basemod2.append(x.replace('l', '!'))
+                basemod2.append(x.replace('i', '1'))
+                basemod2.append(x.replace('i', '!'))
+                basemod2.append(x.replace('e', '3'))
+                basemod2.append(x.replace('s', '$'))
+                basemod2.append(x.replace('a', '@').replace('i', '!'))
+                basemod2.append(x.replace('a', '@').replace('i', '1'))
+                basemod2.append(x.replace('s', '$').replace('e', '3'))
+                basemod2.append(x.replace('o', '0').replace('e', '3'))
+                basemod2.append(x.replace('o', '0').replace('l', '1').replace('e', '3'))
+                basemod2.append(x.replace('o', '0').replace('l', '!').replace('e', '3'))
+                basemod2.append(x.replace('o', '0').replace('i', '1').replace('e', '3'))
+                basemod2.append(x.replace('o', '0').replace('i', '!').replace('e', '3'))
+                basemod2.append(x.replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3'))
+                basemod2.append(x.replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3'))
+                basemod2.append(x.replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3'))
+                basemod2.append(x.replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3'))
+                basemod2.append(
+                    x.replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3').replace('s', '$'))
+                basemod2.append(
+                    x.replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3').replace('s', '$'))
+                basemod2.append(
+                    x.replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3').replace('s', '$'))
+                basemod2.append(
+                    x.replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3').replace('s', '$'))
+        basemod2 = list(set(basemod2))
 
-                    if substitution and combine:
-                        basemod_append_words.append(x + y)
-                        basemod_append_words.append(x.title() + y)
-                        basemod_append_words.append(x + y.title())
-                        basemod_append_words.append(x.upper() + y.upper())
-                        basemod_append_words.append(x.title() + y.title())
+    word_lists = [basemod2, base]
+    for word_list in word_lists:
+        for x in word_list:
+            basemod.append(x)
+            basemod.append(x.upper())
+            basemod.append(x.title())
 
-                    if append_chars:
-                        for z in append_chars:
-                            basemod.append(x + y+z)
-                            basemod.append(x.title() + y+z)
-                            basemod.append(x + y.title()+z)
-                            basemod.append(x.upper() + y.upper()+z)
-                            basemod.append(x.title() + y.title()+z)
+            for y in prepend_chars:
+                basemod.append(y + x)
+                basemod.append(y + x.title())
+                basemod.append(y + x.upper())
 
-    for x in base:
-        if append_chars:
             for y in append_chars:
                 basemod.append(x + y)
                 basemod.append(x.title() + y)
                 basemod.append(x.upper() + y)
 
-        if append_words:
-            for y in append_words:
-                basemod.append(x + y)
-                basemod.append(x.title() + y)
-                basemod.append(x + y.title())
-                basemod.append(x.upper() + y.upper())
-                basemod.append(x.title() + y.title())
+            for y in combine:
+                if x != y:
+                    # switch x & y without repeating entire block of code
+                    for switch in [0, 1]:
+                        if switch == 1:
+                            a = x
+                            b = y
+                        else:
+                            a = y
+                            b = x
+                        basemod.append(a + b)
+                        basemod.append(a + b.upper())
+                        basemod.append(a + b.title())
 
-                if substitution and combine:
-                    basemod_append_words.append(x + y)
-                    basemod_append_words.append(x.title() + y)
-                    basemod_append_words.append(x + y.title())
-                    basemod_append_words.append(x.upper() + y.upper())
-                    basemod_append_words.append(x.title() + y.title())
+                        basemod.append(a.upper() + b)
+                        basemod.append(a.title() + b)
 
-                if append_chars:
-                    for z in append_chars:
-                        basemod.append(x + y+z)
-                        basemod.append(x.title() + y+z)
-                        basemod.append(x + y.title()+z)
-                        basemod.append(x.upper() + y.upper()+z)
-                        basemod.append(x.title() + y.title()+z)
+                        basemod.append(a.upper() + b.upper())
+                        basemod.append(a.title() + b.upper())
+                        basemod.append(a.upper() + b.title())
+                        basemod.append(a.title() + b.title())
 
-                        if substitution and combine:
-                            basemod_append_words.append(x + y + z)
-                            basemod_append_words.append(x.title() + y + z)
-                            basemod_append_words.append(x + y.title() + z)
-                            basemod_append_words.append(x.upper() + y.upper() + z)
-                            basemod_append_words.append(x.title() + y.title() + z)
+                        for z in append_chars:
+                            basemod.append(a + b + z)
+                            basemod.append(a + b.upper() + z)
+                            basemod.append(a + b.title() + z)
 
-        if prepend_chars:
-            for y in prepend_chars:
-                basemod.append(y+x)
+                            basemod.append(a.upper() + b + z)
+                            basemod.append(a.title() + b + z)
 
-        if prepend_words:
-            for y in prepend_words:
-                basemod.append(y+x)
-                basemod.append(y+ x.title())
-                basemod.append(y.title()+x)
-                basemod.append(y.upper() + x.upper())
-                basemod.append(y.title() + x.title())
+                            basemod.append(a.upper() + b.upper() + z)
+                            basemod.append(a.title() + b.upper() + z)
+                            basemod.append(a.upper() + b.title() + z)
+                            basemod.append(a.title() + b.title() + z)
 
-    if substitution:
-        for x in base:
-            basemod.append(x.replace('o', '0'))
-            basemod.append(x.replace('a', '4'))
-            basemod.append(x.replace('a', '@'))
-            basemod.append(x.replace('l', '1'))
-            basemod.append(x.replace('l', '!'))
-            basemod.append(x.replace('i', '1'))
-            basemod.append(x.replace('i', '!'))
-            basemod.append(x.replace('e', '3'))
-            basemod.append(x.replace('s', '$'))
-            basemod.append(x.replace('a', '@').replace('i', '!'))
-            basemod.append(x.replace('a', '@').replace('i', '1'))
-            basemod.append(x.replace('s', '$').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('i', '1').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('i', '!').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3').replace('s', '$'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3').replace('s', '$'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3').replace('s', '$'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3').replace('s', '$'))
+                        for z in prepend_chars:
+                            basemod.append(z + a + b)
+                            basemod.append(z + a + b.upper())
+                            basemod.append(z + a + b.title())
 
-            #Subtitution x.title()
-            basemod.append(x.title().replace('o', '0'))
-            basemod.append(x.title().replace('a', '4'))
-            basemod.append(x.title().replace('a', '@'))
-            basemod.append(x.title().replace('l', '1'))
-            basemod.append(x.title().replace('l', '!'))
-            basemod.append(x.title().replace('i', '1'))
-            basemod.append(x.title().replace('i', '!'))
-            basemod.append(x.title().replace('e', '3'))
-            basemod.append(x.title().replace('s', '$'))
-            basemod.append(x.title().replace('a', '@').replace('i', '!'))
-            basemod.append(x.title().replace('a', '@').replace('i', '1'))
-            basemod.append(x.title().replace('s', '$').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('l', '1').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('l', '!').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('i', '1').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('i', '!').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3'))
-            basemod.append(x.title().replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3').replace('s', '$'))
-            basemod.append(x.title().replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3').replace('s', '$'))
-            basemod.append(x.title().replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3').replace('s', '$'))
-            basemod.append(x.title().replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3').replace('s', '$'))
+                            basemod.append(z + a.upper() + b)
+                            basemod.append(z + a.title() + b)
 
-            #Subtitution x.upper()
-            basemod.append(x.upper().replace('o', '0'))
-            basemod.append(x.upper().replace('a', '4'))
-            basemod.append(x.upper().replace('a', '@'))
-            basemod.append(x.upper().replace('l', '1'))
-            basemod.append(x.upper().replace('l', '!'))
-            basemod.append(x.upper().replace('i', '1'))
-            basemod.append(x.upper().replace('i', '!'))
-            basemod.append(x.upper().replace('e', '3'))
-            basemod.append(x.upper().replace('s', '$'))
-            basemod.append(x.upper().replace('a', '@').replace('i', '!'))
-            basemod.append(x.upper().replace('a', '@').replace('i', '1'))
-            basemod.append(x.upper().replace('s', '$').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '1').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '!').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('i', '1').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('i', '!').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3').replace('s', '$'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3').replace('s', '$'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3').replace('s', '$'))
-            basemod.append(x.upper().replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3').replace('s', '$'))
+                            basemod.append(z + a.upper() + b.upper())
+                            basemod.append(z + a.title() + b.upper())
+                            basemod.append(z + a.upper() + b.title())
+                            basemod.append(z + a.title() + b.title())
 
-        #perform substitution on baseword combinations
-        for x in basemod_append_words:
-            basemod.append(x.replace('o', '0'))
-            basemod.append(x.replace('a', '4'))
-            basemod.append(x.replace('a', '@'))
-            basemod.append(x.replace('l', '1'))
-            basemod.append(x.replace('l', '!'))
-            basemod.append(x.replace('i', '1'))
-            basemod.append(x.replace('i', '!'))
-            basemod.append(x.replace('e', '3'))
-            basemod.append(x.replace('s', '$'))
-            basemod.append(x.replace('a', '@').replace('i', '!'))
-            basemod.append(x.replace('a', '@').replace('i', '1'))
-            basemod.append(x.replace('s', '$').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('i', '1').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('i', '!').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('a', '4').replace('e', '3').replace('s', '$'))
-            basemod.append(x.replace('o', '0').replace('l', '1').replace('a', '@').replace('e', '3').replace('s', '$'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('a', '4').replace('e', '3').replace('s', '$'))
-            basemod.append(x.replace('o', '0').replace('l', '!').replace('a', '@').replace('e', '3').replace('s', '$'))
+                        for z in connecting_chars:
+                            basemod.append(a + z + b)
+                            basemod.append(a + z + b.upper())
+                            basemod.append(a + z + b.title())
 
-    #Dedup and write to file
-    tmp = []
-    openFile = open(outfile, 'a')
-    for pwd in basemod:
-        if pwd not in tmp:
-            tmp.append(pwd)
-            openFile.write("{}\n".format(pwd))
+                            basemod.append(a.upper() + z + b)
+                            basemod.append(a.title() + z + b)
+
+                            basemod.append(a.upper() + z + b.upper())
+                            basemod.append(a.title() + z + b.upper())
+                            basemod.append(a.upper() + z + b.title())
+                            basemod.append(a.title() + z + b.title())
+
+    print('[*] Removing potential duplicates...')
+    basemod = list(set(basemod))
+
+    print('[*] {} Unique words created'.format(str(len(basemod))))
+    print('[*] Writing to {}'.format(outfile))
+
+    # Deduplicate and write to file
+    openFile = open(outfile, 'w')
+    for x in basemod:
+        openFile.write('{}\n'.format(x))
     openFile.close()
-    print("\n[+] Password list created: {}\n".format(outfile))
+
+    print("\n[+] Password list complete!\n")
 
 if __name__ == '__main__':
-    VERSION = "0.0.1"
+    VERSION = "0.0.2"
     main()
