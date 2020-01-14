@@ -1,4 +1,3 @@
-impacket/*
 develop-eggs/
 .Python
 env/
@@ -16,8 +15,6 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-test.py
-ideas.txt
 
 # Byte-compiled
 __pycache__/

@@ -110,7 +110,6 @@ class ScrapeEngine():
                 raise Exception("\'{}\' Failed name parsing".format(link.text))
 
             if name not in self.linkedin:
-                # Add to list and remove accents with closest possible character
                 self.linkedin[name] = {}
                 self.linkedin[name]['last'] = name.split(' ')[1].lower().rstrip().lstrip()
                 self.linkedin[name]['first'] = name.split(' ')[0].lower().rstrip().lstrip()
