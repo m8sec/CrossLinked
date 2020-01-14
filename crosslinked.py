@@ -7,6 +7,7 @@ from time import sleep
 from random import choice
 from threading import Thread
 from bs4 import BeautifulSoup
+from unidecode import unidecode
 requests.packages.urllib3.disable_warnings()
 
 USER_AGENTS = [line.strip() for line in open('user_agents.txt')]
@@ -33,8 +34,8 @@ class ScrapeEngine():
         Thread(target=self.timer, args=(timeout,), daemon=True).start()  # Start timeout thread
 
         self.search_links = 0  # Total Links found by search engine
-        self.name_count = 0  # Total names found from linkedin
-        found_names = 0  # Local count to detect when no new names are found
+        self.name_count   = 0  # Total names found from linkedin
+        found_names       = 0  # Local count to detect when no new names are found
 
         while self.running:
             # End on timeout OR when no more LinkedIn names are found
@@ -107,6 +108,7 @@ class ScrapeEngine():
                 raise Exception("\'{}\' Failed name parsing".format(link.text))
 
             if name not in self.linkedin:
+                # Add to list and remove accents with closest possible character
                 self.linkedin[name] = {}
                 self.linkedin[name]['last'] = name.split(' ')[1].lower().rstrip().lstrip()
                 self.linkedin[name]['first'] = name.split(' ')[0].lower().rstrip().lstrip()

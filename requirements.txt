@@ -1,1 +1,4 @@
 bs4
+unidecode
+requests
+argparse
