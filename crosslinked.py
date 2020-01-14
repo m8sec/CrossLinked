@@ -73,8 +73,10 @@ class ScrapeEngine():
         if safe and company_name.lower() not in link.text.lower():
             return False
         try:
+            # Sanitize input
             x = link.text.split("|")[0]
             x = x.split("...")[0]
+            x = unidecode(x)
 
             # Extract Name (if title provided)
             if "–" in x:
