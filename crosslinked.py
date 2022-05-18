@@ -136,8 +136,8 @@ class CrossLinked():
             k = name.lower()
             if k not in self.linkedin:
                 self.linkedin[k] = {}
-                self.linkedin[k]['last'] = name.split(' ')[1].lower()
-                self.linkedin[k]['first'] = name.split(' ')[0].lower()
+                self.linkedin[k]['last'] = unidecode(name.split(' ')[1].lower())
+                self.linkedin[k]['first'] = unidecode(name.split(' ')[0].lower())
                 self.linkedin[k]['title'] = title.strip().lower()
                 self.linkedin[k]['format'] = formatter(args.nformat, self.linkedin[k]['first'], self.linkedin[k]['last'])
                 logger.debug("PASS: {} (SAFE:{}) - {}".format(self.engine.upper(), self.safe, link.text), fg='green')
