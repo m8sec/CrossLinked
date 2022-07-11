@@ -58,7 +58,7 @@ Proxy arguments:
 ```
 
 ## Proxy Support
-The latest version of CrossLinked provides proxy support through the <a href='https://github.com/m8r0wn/taser'>Taser</a>
+The latest version of CrossLinked provides proxy support through the <a href='https://github.com/m8sec/taser'>Taser</a>
 library. Users can mask their traffic with a single proxy by adding ```--proxy 127.0.0.1:8080``` to the command line 
 arguments, or use ```--proxy-file proxies.txt``` for rotating source addresses.
 
