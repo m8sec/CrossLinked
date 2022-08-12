@@ -1,5 +1,0 @@
-taser>=0.3.3
-bs4
-unidecode
-requests
-argparse
