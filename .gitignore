@@ -26,3 +26,6 @@ __pycache__/
 # PyCharm
 .idea
 venv/
+
+# Results
+names.*
