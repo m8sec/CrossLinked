@@ -30,8 +30,8 @@ def banner():
 def cli():
     args = argparse.ArgumentParser(description="", formatter_class=argparse.RawTextHelpFormatter, usage=argparse.SUPPRESS)
     args.add_argument('--debug', dest="debug", action='store_true', help=argparse.SUPPRESS)
-    args.add_argument('-t', dest='timeout', type=float, default=15, help='Max timeout per search (Default=20, 0=None)')
-    args.add_argument('-j', dest='jitter', type=float, default=1, help='Jitter between requests (Default=0)')
+    args.add_argument('-t', dest='timeout', type=float, default=15, help='Max timeout per search (Default=15)')
+    args.add_argument('-j', dest='jitter', type=float, default=1, help='Jitter between requests (Default=1)')
     args.add_argument(dest='company_name', nargs='?', help='Target company name')
 
     s = args.add_argument_group("Search arguments")
