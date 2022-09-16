@@ -104,8 +104,8 @@ positional arguments:
 
 optional arguments:
   -h, --help          show help message and exit
-  -t TIMEOUT          Max timeout per search (Default=20, 0=None)
-  -j JITTER           Jitter between requests (Default=0)
+  -t TIMEOUT          Max timeout per search (Default=15)
+  -j JITTER           Jitter between requests (Default=1)
 
 Search arguments:
   --search ENGINE     Search Engine (Default='google,bing')
