@@ -102,6 +102,7 @@ class CrossLinked:
     def parse_linkedin_fname(self, data):
         try:
             fname = data.split("-")[0].split(' ')[0].strip()
+            fname = fname.replace("'", "")
             return unidecode(fname)
         except:
             return False

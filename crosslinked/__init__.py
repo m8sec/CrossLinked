@@ -12,7 +12,7 @@ from crosslinked.search import CrossLinked
 
 def banner():
 
-    VERSION = 'v0.2.0'
+    VERSION = 'v0.2.1'
 
     print('''
      _____                    _             _            _ 
@@ -98,20 +98,20 @@ def nformatter(nformat, first, last):
 
 def main():
     banner()
-    data = []
     args = cli()
 
-    if args.debug: setup_debug_logger(); debug_args(args)                                  # Setup Debug logging
-    txt = setup_file_logger(args.outfile+".txt", log_name="cLinked_txt", file_mode='w')    # names.txt overwritten
-    csv = setup_file_logger(args.outfile+".csv", log_name="cLinked_csv", file_mode='a')    # names.csv appended
-
-    data = start_parse(args) if args.company_name.endswith('.csv') else start_scrape(args)
-    format_names(args, data, txt) if len(data) > 0 else Log.warn('No results found')
-
-
-if __name__ == '__main__':
     try:
-        main()
+        if args.debug: setup_debug_logger(); debug_args(args)                                  # Setup Debug logging
+        txt = setup_file_logger(args.outfile+".txt", log_name="cLinked_txt", file_mode='w')    # names.txt overwritten
+        csv = setup_file_logger(args.outfile+".csv", log_name="cLinked_csv", file_mode='a')    # names.csv appended
+
+        data = start_parse(args) if args.company_name.endswith('.csv') else start_scrape(args)
+        format_names(args, data, txt) if len(data) > 0 else Log.warn('No results found')
     except KeyboardInterrupt:
         Log.warn("Key event detected, closing...")
         exit(0)
+
+
+if __name__ == '__main__':
+    main()
+
