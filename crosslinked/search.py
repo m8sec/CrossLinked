@@ -118,7 +118,7 @@ class CrossLinked:
     def results_handler(self, link):
         url = str(link.get('href')).lower()
 
-        if extract_subdomain(url) not in ['www.linkedin.com']:
+        if not extract_subdomain(url).endswith('linkedin.com'):
             return False
         elif 'linkedin.com/in' not in url:
             return False
