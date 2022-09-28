@@ -163,7 +163,7 @@ def get_agent():
 def web_request(url, timeout=3, proxies=[], **kwargs):
     try:
         s = requests.Session()
-        r = requests.Request('GET', url, headers={'User-Agent': get_agent()}, **kwargs)
+        r = requests.Request('GET', url, headers={'User-Agent': get_agent()}, cookies = {'CONSENT' : 'YES'}, **kwargs)
         p = r.prepare()
         return s.send(p, timeout=timeout, verify=False, proxies=get_proxy(proxies))
     except requests.exceptions.TooManyRedirects as e:
