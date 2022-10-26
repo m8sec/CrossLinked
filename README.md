@@ -23,7 +23,7 @@ Or, install the most recent code from GitHub:
 ```bash
 git clone https://github.com/m8sec/crosslinked
 cd crosslinked
-python3 setup install
+python3 setup.py install
 ```
 
 
