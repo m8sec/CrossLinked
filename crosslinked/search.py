@@ -38,7 +38,7 @@ class Timer(threading.Thread):
 
 
 class CrossLinked:
-    def __init__(self, search_engine, target, timeout, conn_timeout=3, proxies=[], jitter=0):
+    def __init__(self, search_engine, target, timeout, conn_timeout=3, proxies=[], jitter=0, islatin=False):
         self.results = []
         self.url = {'google': 'https://www.google.com/search?q=site:linkedin.com/in+"{}"&num=100&start={}',
                     'bing': 'http://www.bing.com/search?q="{}"+site:linkedin.com/in&first={}'}
@@ -50,6 +50,7 @@ class CrossLinked:
         self.proxies = proxies
         self.target = target
         self.jitter = jitter
+        self.islatin = islatin
 
     def search(self):
         search_timer = Timer(self.timeout)
@@ -110,7 +111,10 @@ class CrossLinked:
     def parse_linkedin_lname(self, data):
         try:
             name = list(filter(None, data.split("-")[0].split(' ')))
-            lname = name[-1].strip()
+            if len(name) > 2 and self.islatin:
+                lname = name[-2].strip()
+            else:
+                lname = name[-1].strip()
             return unidecode(lname[:-1]) if lname.endswith(".") else unidecode(lname)
         except:
             return False
