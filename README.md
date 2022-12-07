@@ -113,6 +113,7 @@ Search arguments:
 Output arguments:
   -f NFORMAT          Format names, ex: 'domain\{f}{last}', '{first}.{last}@domain.com'
   -o OUTFILE          Change name of output file (omit_extension)
+  -t ISLATIN          Expect latin names with two surnames during the search
 
 Proxy arguments:
   --proxy PROXY       Proxy requests (IP:Port)
