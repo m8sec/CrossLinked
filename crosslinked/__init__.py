@@ -40,6 +40,7 @@ def cli():
     o = args.add_argument_group("Output arguments")
     o.add_argument('-f', dest='nformat', type=str, required=True, help='Format names, ex: \'domain\{f}{last}\', \'{first}.{last}@domain.com\'')
     o.add_argument('-o', dest='outfile', type=str, default='names', help='Change name of output file (omit_extension)')
+    o.add_argument('-l', dest='islatin', action='store_true', help='Consider names as latin names (2 surnames)')
 
     p = args.add_argument_group("Proxy arguments")
     pr = p.add_mutually_exclusive_group(required=False)
