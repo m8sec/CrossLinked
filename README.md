@@ -1,12 +1,10 @@
 # CrossLinked
 <p align="center">
-    <img src="https://img.shields.io/badge/License-GPL%20v3.0-green?style=plastic"/>&nbsp;
+    <img src="https://img.shields.io/badge/License-GPL%20v3.0-green"/>&nbsp;
     <a href="https://www.twitter.com/m8sec">
-        <img src="https://img.shields.io/badge/Twitter-@m8sec-blue?style=plastic&logo=twitter"/>
+        <img src="https://img.shields.io/badge/Twitter-@m8sec-gray?logo=twitter"/>
     </a>&nbsp;
-    <a href="https://github.com/sponsors/m8sec">
-        <img src="https://img.shields.io/badge/Sponsor-GitHub-red?style=plastic&logo=github"/>
-    </a>&nbsp;
+    <img src="https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8%20|%203.9%20-blue.svg"/>&nbsp;
  </p>
 
 CrossLinked is a LinkedIn enumeration tool that uses search engine scraping to collect valid employee names from an 
