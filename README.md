@@ -11,6 +11,10 @@ CrossLinked is a LinkedIn enumeration tool that uses search engine scraping to c
 organization. This technique provides accurate results without the use of API keys, credentials, or accessing 
 LinkedIn directly!
 
+## Sponsors
+<br>
+
+> 🚩 Consider sponsoring this project to ensure the latest improvements, have your company logo/handle listed, get priority support, and more - visit [github.com/sponsors/m8sec](https://github.com/sponsors/m8sec) and thank you for your support. 
 
 ## Install
 Install the last stable release from PyPi:
