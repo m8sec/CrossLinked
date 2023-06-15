@@ -59,8 +59,6 @@ def setup_debug_logger():
 
 
 def setup_file_logger(file_name, log_name='cLinked_file', file_mode='w'):
-    init = False if os.path.exists(file_name) else True
-
     formatter = logging.Formatter('%(message)s')
     fileHandler = logging.FileHandler(file_name, file_mode)
     fileHandler.setFormatter(formatter)
@@ -70,14 +68,13 @@ def setup_file_logger(file_name, log_name='cLinked_file', file_mode='w'):
     logger.addHandler(fileHandler)
     logger.setLevel(logging.INFO)
 
-    first_run(logger) if init else False
-
+    first_run(logger) if not os.path.exists(file_name) else False
     return logger
 
 
 def first_run(logger):
     # init headings in CSV log file
-    logger.info('Datetime, Search, First, Last, Title, URL, rawText')
+    logger.info('Datetime, Search, Name, Title, URL, rawText')
 
 
 def setup_cli_logger(log_level=logging.INFO, logger_name='cLinked'):

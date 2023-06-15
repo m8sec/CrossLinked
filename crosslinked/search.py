@@ -88,8 +88,7 @@ class CrossLinked:
         u = {'url': url}
         u['text'] = unidecode(link.text.split("|")[0].split("...")[0])  # Capture link text before trailing chars
         u['title'] = self.parse_linkedin_title(u['text'])               # Extract job title
-        u['fname'] = self.parse_linkedin_fname(u['text'])               # Extract first name
-        u['lname'] = self.parse_linkedin_lname(u['text'])               # Extract last name
+        u['name'] = self.parse_linkedin_name(u['text'])                 # Extract whole name
         return u
 
     def parse_linkedin_title(self, data):
@@ -99,19 +98,10 @@ class CrossLinked:
         except:
             return 'N/A'
 
-    def parse_linkedin_fname(self, data):
+    def parse_linkedin_name(self, data):
         try:
-            fname = data.split("-")[0].split(' ')[0].strip()
-            fname = fname.replace("'", "")
-            return unidecode(fname)
-        except:
-            return False
-
-    def parse_linkedin_lname(self, data):
-        try:
-            name = list(filter(None, data.split("-")[0].split(' ')))
-            lname = name[-1].strip()
-            return unidecode(lname[:-1]) if lname.endswith(".") else unidecode(lname)
+            name = data.split("-")[0].strip()
+            return unidecode(name)
         except:
             return False
 
@@ -124,17 +114,20 @@ class CrossLinked:
             return False
 
         data = self.link_parser(url, link)
-        if data['fname'] and data['lname']:
-            self.log_results(data)
+        self.log_results(data) if data['name'] else False
 
-    def log_results(self, data):
-        if data in self.results:
+
+    def log_results(self, d):
+        # Prevent Duplicates & non-standard responses (i.e: "<span>linkedin.com</span></a>")
+        if d in self.results:
             return
-        self.results.append(data)
+        elif 'linkedin.com' in d['name']:
+            return
+
+        self.results.append(d)
         # Search results are logged to names.csv but names.txt is not generated until end to prevent duplicates
-        logging.debug('  Fname: {:13} Lname: {:13} RawTxt: {}'.format(data['fname'], data['lname'], data['text']))
-        csv.info('"{}","{}","{}","{}","{}","{}","{}",'.format(self.runtime, self.search_engine, data['fname'],
-                                                           data['lname'], data['title'], data['url'], data['text']))
+        logging.debug('name: {:25} RawTxt: {}'.format(d['name'], d['text']))
+        csv.info('"{}","{}","{}","{}","{}","{}",'.format(self.runtime, self.search_engine, d['name'], d['title'], d['url'], d['text']))
 
 
 def get_statuscode(resp):
@@ -151,12 +144,15 @@ def get_proxy(proxies):
 
 def get_agent():
     return choice([
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 12.5; rv:104.0) Gecko/20100101 Firefox/104.0',
-        'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 12_5_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0'
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 12.5; rv:104.0) Gecko/20100101 Firefox/104.0',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15'
     ])
 
 

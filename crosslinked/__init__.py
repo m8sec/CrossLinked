@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Author: @m8sec
 # License: GPLv3
-
+import re
 import argparse
 from sys import exit
 from csv import reader
@@ -12,7 +12,7 @@ from crosslinked.search import CrossLinked
 
 def banner():
 
-    VERSION = 'v0.2.1'
+    VERSION = 'v0.3.0'
 
     print('''
      _____                    _             _            _ 
@@ -64,11 +64,12 @@ def start_parse(args):
     utils.file_exists(args.company_name, contents=False)
     Log.info('Parsing employee names from \"{}\"'.format(args.company_name))
 
-    with open(args.company_name) as f:
+    with open(args.company_name, 'r') as f:
         csv_data = reader(f, delimiter=',')
         next(csv_data)
         for r in csv_data:
-            tmp.append({'fname': r[2], 'lname': r[3]})
+            print(r)
+            tmp.append({'name': r[2].strip()}) if r[2] else False
     return tmp
 
 
@@ -77,23 +78,35 @@ def format_names(args, data, logger):
     Log.info('{} names collected'.format(len(data)))
 
     for d in data:
-        fname = d['fname'].lower().strip()
-        lname = d['lname'].lower().strip()
-        name = nformatter(args.nformat, fname, lname)
+        name = nformatter(args.nformat, d['name'])
         if name not in tmp:
             logger.info(name)
             tmp.append(name)
     Log.success("{} unique names added to {}!".format(len(tmp), args.outfile+".txt"))
 
 
-def nformatter(nformat, first, last):
-    # place names in user-defined format
-    name = nformat
-    name = name.replace('{f}', first[0])
-    name = name.replace('{first}', first)
-    name = name.replace('{l}', last[0])
-    name = name.replace('{last}', last)
-    return name
+def nformatter(nformat, name):
+    # Get position of name values in text
+    tmp = nformat.split('}')
+    f_position = int(re.search(r'(-?\d+)', tmp[0]).group(0)) if ':' in tmp[0] else 0
+    l_position = int(re.search(r'(-?\d+)', tmp[1]).group(0)) if ':' in tmp[1] else -1
+
+    # Extract names from raw text
+    tmp = name.split(' ')
+    try:
+        f_name = tmp[f_position] if len(tmp) > 2 else tmp[0]
+        l_name = tmp[l_position] if len(tmp) > 2 else tmp[-1]
+    except:
+        f_name = tmp[0]
+        l_name = tmp[-1]
+
+    # Use replace function to create final output
+    val = re.sub(r'-?\d+:', '', nformat)
+    val = val.replace('{f}', f_name[0])
+    val = val.replace('{first}', f_name)
+    val = val.replace('{l}', l_name[0])
+    val = val.replace('{last}', l_name)
+    return val
 
 
 def main():
