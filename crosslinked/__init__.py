@@ -68,7 +68,6 @@ def start_parse(args):
         csv_data = reader(f, delimiter=',')
         next(csv_data)
         for r in csv_data:
-            print(r)
             tmp.append({'name': r[2].strip()}) if r[2] else False
     return tmp
 
