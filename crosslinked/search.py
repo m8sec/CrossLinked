@@ -1,18 +1,18 @@
 import logging
-import requests
 import threading
-from time import sleep
-from random import choice
-from bs4 import BeautifulSoup
-from unidecode import unidecode
-from urllib.parse import urlparse
-from crosslinked.logger import Log
 from datetime import datetime, timedelta
+from random import choice
+from time import sleep
+from urllib.parse import urlparse
+
+import requests
+from bs4 import BeautifulSoup
+from crosslinked.logger import Log
+from unidecode import unidecode
 from urllib3 import disable_warnings, exceptions
 
 disable_warnings(exceptions.InsecureRequestWarning)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
-csv = logging.getLogger('cLinked_csv')
 
 
 class Timer(threading.Thread):
@@ -38,7 +38,9 @@ class Timer(threading.Thread):
 
 
 class CrossLinked:
-    def __init__(self, search_engine, target, timeout, conn_timeout=3, proxies=[], jitter=0):
+    def __init__(self, search_engine, target, timeout, conn_timeout=3, proxies=None, jitter=0):
+        if proxies is None:
+            proxies = []
         self.results = []
         self.url = {'google': 'https://www.google.com/search?q=site:linkedin.com/in+"{}"&num=100&start={}',
                     'bing': 'http://www.bing.com/search?q="{}"+site:linkedin.com/in&first={}'}
@@ -51,7 +53,7 @@ class CrossLinked:
         self.target = target
         self.jitter = jitter
 
-    def search(self):
+    def search(self, csv):
         search_timer = Timer(self.timeout)
         search_timer.start()
 
@@ -66,7 +68,7 @@ class CrossLinked:
                     Log.warn('None 200 response, exiting search ({})'.format(http_code))
                     break
 
-                self.page_parser(resp)
+                self.page_parser(resp, csv)
                 Log.info("{:<3} {} ({})".format(len(self.results), url, http_code))
 
                 sleep(self.jitter)
@@ -77,35 +79,37 @@ class CrossLinked:
         search_timer.stop()
         return self.results
 
-    def page_parser(self, resp):
+    def page_parser(self, resp, csv):
         for link in extract_links(resp):
             try:
-                self.results_handler(link)
+                self.results_handler(link, csv)
             except Exception as e:
-                Log.warn('Failed Parsing: {}- {}'.format(link.get('href'), e))
+                Log.warn('Failed Parsing: {} - {}'.format(link.get('href'), e))
 
     def link_parser(self, url, link):
-        u = {'url': url}
-        u['text'] = unidecode(link.text.split("|")[0].split("...")[0])  # Capture link text before trailing chars
-        u['title'] = self.parse_linkedin_title(u['text'])               # Extract job title
-        u['name'] = self.parse_linkedin_name(u['text'])                 # Extract whole name
+        text = unidecode(link.text.split("|")[0].split("...")[0])
+        u = {'url': url,
+             'text': text,                              # Capture link text before trailing chars
+             'title': self.parse_linkedin_title(text),  # Extract job title
+             'name': self.parse_linkedin_name(text)     # Extract whole name
+             }
         return u
 
     def parse_linkedin_title(self, data):
         try:
-            title = data.split("-")[1].split('https:')[0]
+            title = data.split(" - ")[1].split('https:')[0]
             return title.split("...")[0].split("|")[0].strip()
         except:
             return 'N/A'
 
     def parse_linkedin_name(self, data):
         try:
-            name = data.split("-")[0].strip()
+            name = data.split(" - ")[0].strip()
             return unidecode(name)
         except:
             return False
 
-    def results_handler(self, link):
+    def results_handler(self, link, csv):
         url = str(link.get('href')).lower()
 
         if not extract_subdomain(url).endswith('linkedin.com'):
@@ -114,10 +118,9 @@ class CrossLinked:
             return False
 
         data = self.link_parser(url, link)
-        self.log_results(data) if data['name'] else False
+        self.log_results(data, csv) if data['name'] else False
 
-
-    def log_results(self, d):
+    def log_results(self, d, csv):
         # Prevent Duplicates & non-standard responses (i.e: "<span>linkedin.com</span></a>")
         if d in self.results:
             return
@@ -127,7 +130,7 @@ class CrossLinked:
         self.results.append(d)
         # Search results are logged to names.csv but names.txt is not generated until end to prevent duplicates
         logging.debug('name: {:25} RawTxt: {}'.format(d['name'], d['text']))
-        csv.info('"{}","{}","{}","{}","{}","{}",'.format(self.runtime, self.search_engine, d['name'], d['title'], d['url'], d['text']))
+        csv.info('"{}","{}","{}","{}","{}","{}"'.format(self.runtime, self.search_engine, d['name'], d['title'], d['url'], d['text']))
 
 
 def get_statuscode(resp):
@@ -156,10 +159,10 @@ def get_agent():
     ])
 
 
-def web_request(url, timeout=3, proxies=[], **kwargs):
+def web_request(url, timeout=3, proxies=None, **kwargs):
     try:
         s = requests.Session()
-        r = requests.Request('GET', url, headers={'User-Agent': get_agent()}, cookies = {'CONSENT' : 'YES'}, **kwargs)
+        r = requests.Request('GET', url, headers={'User-Agent': get_agent()}, cookies={'CONSENT': 'YES'}, **kwargs)
         p = r.prepare()
         return s.send(p, timeout=timeout, verify=False, proxies=get_proxy(proxies))
     except requests.exceptions.TooManyRedirects as e:

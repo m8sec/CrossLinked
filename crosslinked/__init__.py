@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # Author: @m8sec
 # License: GPLv3
-import re
 import argparse
-from sys import exit
+import re
 from csv import reader
+from sys import exit
+
 from crosslinked import utils
 from crosslinked.logger import *
 from crosslinked.search import CrossLinked
@@ -16,11 +17,11 @@ def banner():
 
     print('''
      _____                    _             _            _ 
-    /  __ \                  | |   ({})     | |          | |
-    | /  \/_ __ ___  ___ ___ | |    _ _ __ | | _____  __| |
-    | |   | '__/ _ \/ __/ __|| |   | | '_ \| |/ / _ \/ _` |
-    | \__/\ | | (_) \__ \__ \| |___| | | | |   <  __/ (_| | {}
-     \____/_|  \___/|___/___/\_____/_|_| |_|_|\_\___|\__,_| {}
+    /  __ \\                  | |   ({})     | |          | |
+    | /  \\/_ __ ___  ___ ___ | |    _ _ __ | | _____  __| |
+    | |   | '__/ _ \\/ __/ __|| |   | | '_ \\| |/ / _ \\/ _` |
+    | \\__/\\ | | (_) \\__ \\__ \\| |___| | | | |   <  __/ (_| | {}
+     \\____/_|  \\___/|___/___/\\_____/_|_| |_|_|\\_\\___|\\__,_| {}
 
     '''.format(highlight('x', fg='gray'),
                highlight("@m8sec", fg='gray'),
@@ -38,7 +39,7 @@ def cli():
     s.add_argument('--search', dest='engine', default='google,bing', type=lambda x: utils.delimiter2list(x), help='Search Engine (Default=\'google,bing\')')
 
     o = args.add_argument_group("Output arguments")
-    o.add_argument('-f', dest='nformat', type=str, required=True, help='Format names, ex: \'domain\{f}{last}\', \'{first}.{last}@domain.com\'')
+    o.add_argument('-f', dest='nformat', type=str, required=True, help='Format names, ex: \'domain\\{f}{last}\', \'{first}.{last}@domain.com\'')
     o.add_argument('-o', dest='outfile', type=str, default='names', help='Change name of output file (omit_extension)')
 
     p = args.add_argument_group("Proxy arguments")
@@ -48,14 +49,14 @@ def cli():
     return args.parse_args()
 
 
-def start_scrape(args):
+def start_scrape(args, csv):
     tmp = []
     Log.info("Searching {} for valid employee names at \"{}\"".format(', '.join(args.engine), args.company_name))
 
     for search_engine in args.engine:
         c = CrossLinked(search_engine,  args.company_name, args.timeout, 3, args.proxy, args.jitter)
         if search_engine in c.url.keys():
-            tmp += c.search()
+            tmp += c.search(csv)
     return tmp
 
 
@@ -72,14 +73,14 @@ def start_parse(args):
     return tmp
 
 
-def format_names(args, data, logger):
+def format_names(args, data, logger_):
     tmp = []
     Log.info('{} names collected'.format(len(data)))
 
     for d in data:
         name = nformatter(args.nformat, d['name'])
         if name not in tmp:
-            logger.info(name)
+            logger_.info(name)
             tmp.append(name)
     Log.success("{} unique names added to {}!".format(len(tmp), args.outfile+".txt"))
 
@@ -101,10 +102,10 @@ def nformatter(nformat, name):
 
     # Use replace function to create final output
     val = re.sub(r'-?\d+:', '', nformat)
-    val = val.replace('{f}', f_name[0])
-    val = val.replace('{first}', f_name)
-    val = val.replace('{l}', l_name[0])
-    val = val.replace('{last}', l_name)
+    val = val.replace('{f}', f_name[0].lower())
+    val = val.replace('{first}', f_name.lower())
+    val = val.replace('{l}', l_name[0].lower())
+    val = val.replace('{last}', l_name.lower())
     return val
 
 
@@ -116,8 +117,7 @@ def main():
         if args.debug: setup_debug_logger(); debug_args(args)                                  # Setup Debug logging
         txt = setup_file_logger(args.outfile+".txt", log_name="cLinked_txt", file_mode='w')    # names.txt overwritten
         csv = setup_file_logger(args.outfile+".csv", log_name="cLinked_csv", file_mode='a')    # names.csv appended
-
-        data = start_parse(args) if args.company_name.endswith('.csv') else start_scrape(args)
+        data = start_parse(args) if args.company_name.endswith('.csv') else start_scrape(args, csv)
         format_names(args, data, txt) if len(data) > 0 else Log.warn('No results found')
     except KeyboardInterrupt:
         Log.warn("Key event detected, closing...")
@@ -126,4 +126,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
