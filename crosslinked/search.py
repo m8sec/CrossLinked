@@ -101,7 +101,7 @@ class CrossLinked:
     def parse_linkedin_name(self, data):
         try:
             name = data.split("-")[0].strip()
-            return unidecode(name)
+            return unidecode(name).lower()
         except:
             return False
 

@@ -29,7 +29,11 @@ class Log:
 
     @staticmethod
     def warn(msg):
-        print(' '.join([highlight('[*]', 'bold', 'yellow'), msg]))
+        print(' '.join([highlight('[!]', 'bold', 'yellow'), msg]))
+
+    @staticmethod
+    def fail(msg):
+        print(' '.join([highlight('[-]', 'bold', 'red'), msg]))
 
 
 def code_gen(data, style, color, windows=False):
