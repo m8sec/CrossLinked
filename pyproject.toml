@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "crosslinked"
+version = "0.3.0"
+license = "GPL-3.0"
+authors = ["m8sec"]
+description = "Linkedin enumeration through search engine scraping"
+repository = "https://github.com/m8sec/CrossLinked"
+homepage = "https://github.com/m8sec/CrossLinked"
+packages = [
+    { include = "crosslinked"}
+]
+
+[tool.poetry.scripts]
+crosslinked = 'crosslinked:main'
+
+[tool.poetry.dependencies]
+python = "^3.8"
+beautifulsoup4 = "^4.12.2"
+bs4 = "^0.0.1"
+certifi = "^2023.7.22"
+charset-normalizer = "^3.2.0"
+idna = "^3.4"
+lxml = "^4.9.3"
+requests = "^2.31.0"
+soupsieve = "^2.5"
+Unidecode = "^1.3.7"
+urllib3 = "^2.0.5"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

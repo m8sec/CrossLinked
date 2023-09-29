@@ -54,17 +54,28 @@ Built for developers, by developers.
 
 
 # Install
+### PyPi
 Install the last stable release from PyPi:
 ```commandline
 pip3 install crosslinked
 ```
-Or, install the most recent code from GitHub:
+
+### Poetry
+Install and run the latest code using [Poetry](https://python-poetry.org/docs/#installing-with-the-official-installer):
+```bash
+git clone https://github.com/m8sec/subscraper
+cd subscraper
+poetry install
+poetry run crosslinked -h
+```
+
+### Python
+Install the most recent code from GitHub:
 ```bash
 git clone https://github.com/m8sec/crosslinked
 cd crosslinked
 pip3 install .
 ```
-
 
 # Prerequisites
 CrossLinked assumes the organization's account naming convention has already been identified. This is required for execution and should be added to the CMD args based on your expected output. See the [Naming Format](#naming-format) and [Example Usage](#example-usage) sections below:
