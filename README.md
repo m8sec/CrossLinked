@@ -3,11 +3,15 @@
 </div>
 
 <p align="center">
-    <img src="https://img.shields.io/badge/Version-v0.3.0-green"/>&nbsp;
     <a href="https://www.twitter.com/m8sec">
-        <img src="https://img.shields.io/badge/Twitter-@m8sec-gray?logo=twitter"/>
+        <img src="https://img.shields.io/badge/Twitter-@m8sec-blue?style=plastic&logo=twitter"/>
     </a>&nbsp;
-    <img src="https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8%20|%203.9%20|%203.10%20-blue.svg"/>&nbsp;
+    <a href="/LICENSE">
+        <img src="https://img.shields.io/badge/License-GPL%20v3.0-green.svg"/>&nbsp;
+    </a>&nbsp;
+    <a href="https://github.com/sponsors/m8sec">
+        <img src="https://img.shields.io/badge/Sponsor-GitHub-red?style=plastic&logo=github"/>
+    </a>&nbsp;
 </p>
 
 
