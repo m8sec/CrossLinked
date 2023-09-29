@@ -62,7 +62,7 @@ Or, install the most recent code from GitHub:
 ```bash
 git clone https://github.com/m8sec/crosslinked
 cd crosslinked
-python3 setup.py install
+pip3 install .
 ```
 
 
@@ -89,16 +89,16 @@ To be compatible with alternate naming conventions CrossLinked allows users to c
 
 ```
 # Default output
-crosslinked -f '{first}.{last}@company.com' Company
+python3 crosslinked.py -f '{first}.{last}@company.com' Company
 John David Smith = john.smith@company.com
 
 # Use the second-to-last name as "last"
-crosslinked -f '{0:first}.{-2:last}@company.com' Company
+python3 crosslinked.py -f '{0:first}.{-2:last}@company.com' Company
 John David Smith    = john.david@company.com
 Jane Doe            = jane.doe@company.com
 
 # Use the second item in the array as "last"
-crosslinked -f '{first}.{1:last}@company.com' Company
+python3 crosslinked.py -f '{first}.{1:last}@company.com' Company
 John David Smith    = john.david@company.com
 Jane Doe            = jane.doe@company.com
 ```
