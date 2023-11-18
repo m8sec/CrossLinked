@@ -1,14 +1,16 @@
 import logging
-import requests
 import threading
-from time import sleep
+from datetime import datetime, timedelta
 from random import choice
+from time import sleep
+from urllib.parse import urlparse
+
+import requests
 from bs4 import BeautifulSoup
 from unidecode import unidecode
-from urllib.parse import urlparse
-from crosslinked.logger import Log
-from datetime import datetime, timedelta
 from urllib3 import disable_warnings, exceptions
+
+from crosslinked.logger import Log
 
 disable_warnings(exceptions.InsecureRequestWarning)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -38,7 +40,9 @@ class Timer(threading.Thread):
 
 
 class CrossLinked:
-    def __init__(self, search_engine, target, timeout, conn_timeout=3, proxies=[], jitter=0):
+    def __init__(self, search_engine, target, timeout, conn_timeout=3, proxies=None, jitter=0):
+        if proxies is None:
+            proxies = []
         self.results = []
         self.url = {'google': 'https://www.google.com/search?q=site:linkedin.com/in+"{}"&num=100&start={}',
                     'bing': 'http://www.bing.com/search?q="{}"+site:linkedin.com/in&first={}'}
@@ -63,7 +67,7 @@ class CrossLinked:
 
                 if http_code != 200:
                     Log.info("{:<3} {} ({})".format(len(self.results), url, http_code))
-                    Log.warn('None 200 response, exiting search ({})'.format(http_code))
+                    Log.warn(f'None 200 response, exiting search ({http_code})')
                     break
 
                 self.page_parser(resp)
@@ -82,27 +86,26 @@ class CrossLinked:
             try:
                 self.results_handler(link)
             except Exception as e:
-                Log.warn('Failed Parsing: {}- {}'.format(link.get('href'), e))
+                Log.warn(f"Failed Parsing: {link.get('href')}- {e}")
 
     def link_parser(self, url, link):
-        u = {'url': url}
-        u['text'] = unidecode(link.text.split("|")[0].split("...")[0])  # Capture link text before trailing chars
-        u['title'] = self.parse_linkedin_title(u['text'])               # Extract job title
-        u['name'] = self.parse_linkedin_name(u['text'])                 # Extract whole name
+        u = {'url': url, 'text': unidecode(link.text.split("|")[0].split("...")[0])}
+        u['title'] = self.parse_linkedin_title(u['text'])  # Extract job title
+        u['name'] = self.parse_linkedin_name(u['text'])  # Extract whole name
         return u
 
     def parse_linkedin_title(self, data):
         try:
             title = data.split("-")[1].split('https:')[0]
             return title.split("...")[0].split("|")[0].strip()
-        except:
+        except Exception:
             return 'N/A'
 
     def parse_linkedin_name(self, data):
         try:
             name = data.split("-")[0].strip()
             return unidecode(name).lower()
-        except:
+        except Exception:
             return False
 
     def results_handler(self, link):
@@ -116,24 +119,22 @@ class CrossLinked:
         data = self.link_parser(url, link)
         self.log_results(data) if data['name'] else False
 
-
     def log_results(self, d):
         # Prevent Duplicates & non-standard responses (i.e: "<span>linkedin.com</span></a>")
-        if d in self.results:
+        if d in self.results or 'linkedin.com' in d['name']:
             return
-        elif 'linkedin.com' in d['name']:
-            return
-
         self.results.append(d)
         # Search results are logged to names.csv but names.txt is not generated until end to prevent duplicates
         logging.debug('name: {:25} RawTxt: {}'.format(d['name'], d['text']))
-        csv.info('"{}","{}","{}","{}","{}","{}",'.format(self.runtime, self.search_engine, d['name'], d['title'], d['url'], d['text']))
+        csv.info(
+            f""""{self.runtime}","{self.search_engine}","{d['name']}","{d['title']}","{d['url']}","{d['text']}","""
+        )
 
 
 def get_statuscode(resp):
     try:
         return resp.status_code
-    except:
+    except Exception:
         return 0
 
 
@@ -156,25 +157,24 @@ def get_agent():
     ])
 
 
-def web_request(url, timeout=3, proxies=[], **kwargs):
+def web_request(url, timeout=3, proxies=None, **kwargs):
+    if proxies is None:
+        proxies = []
     try:
         s = requests.Session()
-        r = requests.Request('GET', url, headers={'User-Agent': get_agent()}, cookies = {'CONSENT' : 'YES'}, **kwargs)
+        r = requests.Request('GET', url, headers={'User-Agent': get_agent()}, cookies={'CONSENT': 'YES'}, **kwargs)
         p = r.prepare()
         return s.send(p, timeout=timeout, verify=False, proxies=get_proxy(proxies))
     except requests.exceptions.TooManyRedirects as e:
-        Log.fail('Proxy Error: {}'.format(e))
-    except:
+        Log.fail(f'Proxy Error: {e}')
+    except Exception:
         pass
     return False
 
 
 def extract_links(resp):
-    links = []
     soup = BeautifulSoup(resp.content, 'lxml')
-    for link in soup.findAll('a'):
-        links.append(link)
-    return links
+    return list(soup.findAll('a'))
 
 
 def extract_subdomain(url):

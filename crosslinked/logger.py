@@ -37,11 +37,11 @@ class Log:
 
 
 def code_gen(data, style, color, windows=False):
-    return data if windows else '\033[0{}{}m{}\033[0m'.format(STYLE[style], FG[color], data)
+    return data if windows else f'\033[0{STYLE[style]}{FG[color]}m{data}\033[0m'
 
 
 def highlight(data, style='bold', fg='blue'):
-    return code_gen(data, style, fg, windows=True if os.name == 'nt' else False)
+    return code_gen(data, style, fg, windows=os.name == 'nt')
 
 
 def debug_args(args):
