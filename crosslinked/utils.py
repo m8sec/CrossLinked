@@ -1,4 +1,5 @@
 from os import path
+
 from crosslinked.logger import Log
 
 
@@ -18,6 +19,5 @@ def delimiter2dict(value, delim_one=";", delim_two=":"):
 def file_exists(filename, contents=True):
     if path.exists(filename):
         return [line.strip() for line in open('filename')] if contents else filename
-    Log.warn("Input file not found: {}".format(filename))
+    Log.warn(f"Input file not found: {filename}")
     exit(1)
-
