@@ -17,7 +17,7 @@ def delimiter2dict(value, delim_one=";", delim_two=":"):
 
 def file_exists(filename, contents=True):
     if path.exists(filename):
-        return [line.strip() for line in open('filename')] if contents else filename
+        return [line.strip() for line in open(filename)] if contents else filename
     Log.warn("Input file not found: {}".format(filename))
     exit(1)
 
