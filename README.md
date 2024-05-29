@@ -30,27 +30,6 @@ LinkedIn directly!
 - [Command-Line Arguments](#command-line-arguments)
 - [Contribute](#contribute)
 
-
-# Sponsors
-[![proxycurl](https://m8sec.dev/images/sponsors/proxycurl.png)](https://nubela.co/proxycurl/?utm_campaign=influencer_marketing&utm_source=github&utm_medium=social&utm_content=mike_m8sec)
-
-Scrape public LinkedIn profile data at scale with [Proxycurl APIs](https://nubela.co/proxycurl/?utm_campaign=influencer_marketing&utm_source=github&utm_medium=social&utm_content=mike_m8sec).
-
-• Scraping Public profiles are battle tested in court in HiQ VS LinkedIn case.<br/>
-• GDPR, CCPA, SOC2 compliant<br/>
-• High rate limit - 300 requests/minute<br/>
-• Fast - APIs respond in ~2s<br/>
-• Fresh data - 88% of data is scraped real-time, other 12% are not older than 29 days<br/>
-• High accuracy<br/>
-• Tons of data points returned per profile
-
-Built for developers, by developers.
-
-<br>
-
-> 🚩 Consider sponsoring this project to ensure the latest improvements, have your company logo listed here, and get priority support - visit [github.com/sponsors/m8sec](https://github.com/sponsors/m8sec)
-
-
 # Install
 ### PyPi
 Install the last stable release from PyPi:
