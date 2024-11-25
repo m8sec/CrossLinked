@@ -39,8 +39,8 @@ pip3 install crosslinked
 ### Poetry
 Install and run the latest code using [Poetry](https://python-poetry.org/docs/#installing-with-the-official-installer):
 ```bash
-git clone https://github.com/m8sec/subscraper
-cd subscraper
+git clone https://github.com/m8sec/crosslinked
+cd crosslinked
 poetry install
 poetry run crosslinked -h
 ```
