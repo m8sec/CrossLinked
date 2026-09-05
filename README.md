@@ -1,3 +1,10 @@
+## Fork development: SearXNG support
+
+This fork adds `--search searxng` with JSON results, bounded pagination, profile
+URL deduplication and explicit failure reporting. See the
+[SearXNG setup and usage guide](docs/searxng.md). Existing Google/Bing defaults
+remain available; their current scraping behavior has not been verified.
+
 <div align="center">
     <h1>CrossLinked</h1>
 </div>

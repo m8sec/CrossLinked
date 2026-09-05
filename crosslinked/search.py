@@ -1,4 +1,6 @@
 import logging
+import csv as csv_module
+import io
 import requests
 import threading
 from time import sleep
@@ -127,7 +129,9 @@ class CrossLinked:
         self.results.append(d)
         # Search results are logged to names.csv but names.txt is not generated until end to prevent duplicates
         logging.debug('name: {:25} RawTxt: {}'.format(d['name'], d['text']))
-        csv.info('"{}","{}","{}","{}","{}","{}",'.format(self.runtime, self.search_engine, d['name'], d['title'], d['url'], d['text']))
+        row = io.StringIO()
+        csv_module.writer(row).writerow([self.runtime, self.search_engine, d['name'], d['title'], d['url'], d['text']])
+        csv.info(row.getvalue().rstrip('\r\n'))
 
 
 def get_statuscode(resp):

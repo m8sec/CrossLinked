@@ -3,18 +3,21 @@
 # License: GPLv3
 import re
 import argparse
+import math
+import os
 from sys import exit
 from csv import reader
 from crosslinked import utils
 from crosslinked.logger import *
 from crosslinked.search import CrossLinked
+from crosslinked.searxng import SearXNG, search_endpoint
 
 
 def banner():
 
     VERSION = 'v0.3.0'
 
-    print('''
+    print(r'''
      _____                    _             _            _ 
     /  __ \                  | |   ({})     | |          | |
     | /  \/_ __ ___  ___ ___ | |    _ _ __ | | _____  __| |
@@ -36,16 +39,32 @@ def cli():
 
     s = args.add_argument_group("Search arguments")
     s.add_argument('--search', dest='engine', default='google,bing', type=lambda x: utils.delimiter2list(x), help='Search Engine (Default=\'google,bing\')')
+    s.add_argument('--searxng-url', default=os.environ.get('SEARXNG_URL'), help='SearXNG instance URL (or SEARXNG_URL environment variable)')
+    s.add_argument('--max-pages', type=int, default=5, help='Maximum SearXNG pages (Default=5)')
 
     o = args.add_argument_group("Output arguments")
-    o.add_argument('-f', dest='nformat', type=str, required=True, help='Format names, ex: \'domain\{f}{last}\', \'{first}.{last}@domain.com\'')
+    o.add_argument('-f', dest='nformat', type=str, required=True, help="Format names, ex: 'domain\\{f}{last}', '{first}.{last}@domain.com'")
     o.add_argument('-o', dest='outfile', type=str, default='names', help='Change name of output file (omit_extension)')
 
     p = args.add_argument_group("Proxy arguments")
     pr = p.add_mutually_exclusive_group(required=False)
     pr.add_argument('--proxy', dest='proxy', action='append', default=[], help='Proxy requests (IP:Port)')
     pr.add_argument('--proxy-file', dest='proxy', default=False, type=lambda x: utils.file_exists(x), help='Load proxies from file for rotation')
-    return args.parse_args()
+    parsed = args.parse_args()
+    if not parsed.company_name:
+        args.error('company_name is required')
+    if any(engine not in ('google', 'bing', 'searxng') for engine in parsed.engine) or not parsed.engine:
+        args.error('--search supports google, bing, searxng')
+    if not math.isfinite(parsed.timeout) or parsed.timeout <= 0 or not math.isfinite(parsed.jitter) or parsed.jitter < 0 or parsed.max_pages < 1:
+        args.error('timeout and max-pages must be positive; jitter must be nonnegative')
+    if 'searxng' in parsed.engine and not parsed.company_name.endswith('.csv'):
+        if not parsed.searxng_url:
+            args.error('--search searxng requires --searxng-url or SEARXNG_URL')
+        try:
+            search_endpoint(parsed.searxng_url)
+        except ValueError as exc:
+            args.error(str(exc))
+    return parsed
 
 
 def start_scrape(args):
@@ -53,6 +72,13 @@ def start_scrape(args):
     Log.info("Searching {} for valid employee names at \"{}\"".format(', '.join(args.engine), args.company_name))
 
     for search_engine in args.engine:
+        if search_engine == 'searxng':
+            c = SearXNG(args.company_name, args.searxng_url, args.timeout,
+                        args.jitter, args.max_pages, args.proxy)
+            tmp += c.search()
+            if c.status in ('failed', 'partial'):
+                args.search_failed = True
+            continue
         c = CrossLinked(search_engine,  args.company_name, args.timeout, 3, args.proxy, args.jitter)
         if search_engine in c.url.keys():
             tmp += c.search()
@@ -118,7 +144,13 @@ def main():
         csv = setup_file_logger(args.outfile+".csv", log_name="cLinked_csv", file_mode='a')    # names.csv appended
 
         data = start_parse(args) if args.company_name.endswith('.csv') else start_scrape(args)
-        format_names(args, data, txt) if len(data) > 0 else Log.warn('No results found')
+        if data:
+            format_names(args, data, txt)
+        elif not getattr(args, 'search_failed', False):
+            Log.warn('No results found')
+        if getattr(args, 'search_failed', False):
+            Log.warn('Search incomplete; any saved results may be partial')
+            exit(1)
     except KeyboardInterrupt:
         Log.warn("Key event detected, closing...")
         exit(0)
