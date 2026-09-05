@@ -29,3 +29,13 @@ venv/
 
 # Results
 names.*
+*.review.csv
+milestone2_review.txt
+newcastle_names.csv
+newcastle_names.txt
+.crosslinked-cache/
+provider-benchmark.json
+newcastle_fresh.csv
+newcastle_fresh.txt
+newcastle_combined.csv
+newcastle_combined.txt

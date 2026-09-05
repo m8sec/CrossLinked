@@ -87,7 +87,7 @@ On a new device, clone the development branch containing SearXNG support:
 ```bash
 mkdir -p ~/projects
 cd ~/projects
-git clone --branch codex/searxng-provider https://github.com/a7t0fwa7/CrossLinked.git
+git clone --branch codex/result-quality https://github.com/a7t0fwa7/CrossLinked.git
 cd CrossLinked
 ```
 
@@ -199,12 +199,87 @@ Alternatively set `$env:SEARXNG_URL = 'http://localhost:8080'`. URLs can include
 deployment subpath or end in `/search`; credentials, queries and fragments are
 rejected. HTTPS verifies certificates. Existing proxy flags are supported.
 
-Output remains `names.txt` and `names.csv`. CSV records the search-result title
+Live searches produce `names.txt`, raw `names.csv`, and `names.review.csv`.
+TXT selects staff/student candidates with usable names; the review CSV preserves
+all candidates and reasons. See [result quality](result-quality.md) for offline
+classification, organization aliases and uncertain results. Raw CSV records the search-result title
 and normalized profile URL. Names and job titles are inferred from titles;
 employment and generated email addresses are not verified. The first record for
 a profile wins. Regional LinkedIn URLs and tracking parameters are deduplicated.
 
 ## Status
+
+### Engine selection and saved progress
+
+Use `--searxng-engines 'google cse,brave'` to request particular engine names
+from your instance. Names must match SearXNG; provider availability and access
+are still controlled by the instance. Omitting this flag uses instance defaults.
+Test one engine at a time with `--max-pages 1` before combining providers.
+
+Explicit engine requests omit `categories`: SearXNG adds category engines to an
+explicit engine list when both parameters are present. An earlier implementation
+sent both and unintentionally included the default general engines. Cache keys
+were versioned after this fix, so those older response pages are not reused.
+
+```bash
+python crosslinked.py 'Newcastle University' \
+  --search searxng --searxng-url http://localhost:8080 \
+  --searxng-engines 'google cse' \
+  --cache-dir .crosslinked-cache -t 60 -j 5 --max-pages 1 \
+  -f '{first}.{last}' -o newcastle_engine_test
+```
+
+Add `--resume` to reuse saved complete pages and retry partial pages. Increase
+`--max-pages` to continue beyond the previous page budget. Cache keys include
+instance, target, engine selection and page. Earlier partial-page records are
+preserved when a retry returns fewer records. Cached evidence retains its original
+observation time; it is not a fresh affiliation check. Use a new cache directory
+for an independent fresh dataset. Avoid concurrent runs sharing a cache directory.
+Raw CSV is appended on reruns, so use a new output prefix when resuming if you
+want a separate raw export. Review/TXT exports are rebuilt for the current run.
+
+Each engine failure is printed once per run, with affected engines summarized at
+the end. SearXNG remains responsible for upstream cooldowns; CrossLinked does not
+reset them or automatically retry access-denied/CAPTCHA responses. Empty failed
+pages are reported as `empty_page_with_engine_failures`, distinct from a clean
+`empty_page`. Other stop reasons are `page_limit`, `time_budget`, `repeated_page`
+and `request_failure`.
+
+Explicit engine selection is validated against the instance's `/config` before
+searching. Unknown names, an unavailable configuration endpoint, or a malformed
+engine list stop that provider instead of risking fallback to default engines.
+Disabled-by-default but installed engines are accepted. The configuration check
+has its own bounded timeout before the search time budget begins.
+
+The CLI defaults to `--retries 2` (allowed range 0–3). Connection failures,
+timeouts, and HTTP 502/503/504 from the SearXNG endpoint get exponential delays
+of 2, 4, then 8 seconds, bounded by the remaining search budget. Numeric
+`Retry-After` headers are respected; an unparseable/date header or a delay longer
+than the remaining budget stops retries. HTTP 403/429, invalid JSON, and
+upstream errors embedded in JSON are not automatically retried. Use
+`--retries 0` for no automatic retries. Upstream cooldowns remain SearXNG's job.
+
+### Local provider smoke test, 5 September 2026
+
+One page per engine for the same Newcastle University profile query, with five
+seconds between engines. This is a single-run snapshot, not a coverage benchmark.
+
+| Engine | Unique profiles | Staff/student candidates | Outcome |
+|---|---:|---:|---|
+| google cse | 20 | 4 | No reported upstream error; request took 22.9 seconds |
+| yandex | 6 | 0 | No reported upstream error; affiliation evidence insufficient for default selection |
+| brave | 0 | 0 | Too many requests |
+| baidu | 0 | 0 | CAPTCHA |
+| mojeek | 0 | 0 | Access denied |
+| qwant | 0 | 0 | CAPTCHA |
+
+Counts are unique within each engine, not incremental across engines. Explicit
+engine selection queried Yandex even though `/config` marked it disabled by
+default; the default-enabled flag is not a reliable test of whether explicit
+selection can use an installed adapter. No instance defaults were changed.
+The slow Google CSE response motivated raising the client request timeout to 30
+seconds. Use `-t 120 --request-timeout 30` when allowing several pages; both limits
+remain subject to the socket-timeout caveat below.
 
 - `complete`: reached an empty page; does not establish exhaustive coverage.
 - `limited`: page/time budget reached or a repeated page detected.
@@ -213,7 +288,7 @@ a profile wins. Regional LinkedIn URLs and tracking parameters are deduplicated.
 
 Partial/failed searches retain collected records and exit with code 1. HTTP 403
 includes JSON configuration guidance. Requests use the remaining search budget,
-capped at 15 seconds per request. These are socket inactivity timeouts, not a
+capped at 30 seconds per request (configurable with `--request-timeout`). These are socket inactivity timeouts, not a
 strict wall-clock deadline. Blocked requests are not retried automatically.
 
 ## Verification

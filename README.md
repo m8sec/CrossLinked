@@ -1,5 +1,9 @@
 ## Fork development: SearXNG support
 
+Result classification and name cleanup are documented in the
+[result quality guide](docs/result-quality.md). Live TXT exports now select
+staff/student candidates; all candidates remain in the review CSV.
+
 This fork adds `--search searxng` with JSON results, bounded pagination, profile
 URL deduplication and explicit failure reporting. See the
 [SearXNG setup and usage guide](docs/searxng.md). Existing Google/Bing defaults
