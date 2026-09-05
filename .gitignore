@@ -39,3 +39,5 @@ newcastle_fresh.csv
 newcastle_fresh.txt
 newcastle_combined.csv
 newcastle_combined.txt
+*.jsonl
+*.run.json

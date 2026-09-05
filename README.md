@@ -4,6 +4,12 @@ Result classification and name cleanup are documented in the
 [result quality guide](docs/result-quality.md). Live TXT exports now select
 staff/student candidates; all candidates remain in the review CSV.
 
+Every run also writes a JSONL export and a `<prefix>.run.json` summary with
+per-provider status, stop reason and exit code. Exports can be fed back in as
+input. See the [outputs guide](docs/outputs.md) for the files, run states and
+the typed `Candidate`/`Provider`/`RunState` API. Tests and type checks run
+offline in GitHub Actions (`.github/workflows/tests.yml`).
+
 This fork adds `--search searxng` with JSON results, bounded pagination, profile
 URL deduplication and explicit failure reporting. See the
 [SearXNG setup and usage guide](docs/searxng.md). Existing Google/Bing defaults

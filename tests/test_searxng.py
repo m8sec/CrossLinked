@@ -1,9 +1,12 @@
 import csv
-import io
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import Mock, patch
 import requests
 from crosslinked import cli
+from crosslinked.models import Candidate
+from crosslinked.output import RawCsvWriter
 from crosslinked.searxng import SearXNG, search_endpoint
 
 
@@ -69,8 +72,10 @@ class ProviderTests(unittest.TestCase):
 
     def test_hyphenated_name(self):
         record = self.provider().parse_result(result('Anne-Marie Dupont – Senior Engineer | LinkedIn'))
-        self.assertEqual(record['name'], 'anne-marie dupont')
-        self.assertEqual(record['title'], 'Senior Engineer')
+        self.assertIsInstance(record, Candidate)
+        self.assertEqual(record.name, 'anne-marie dupont')
+        self.assertEqual(record.title, 'Senior Engineer')
+        self.assertEqual(record.provider, 'searxng')
 
     def test_failures_not_empty_success(self):
         invalid = response()
@@ -102,11 +107,20 @@ class ProviderTests(unittest.TestCase):
     def test_csv_quotes(self):
         provider = self.provider()
         record = provider.parse_result(result('Jane Doe - Engineer, "Platform" | LinkedIn'))
-        with patch('crosslinked.search.csv.info') as log:
-            provider.log_results(record)
-        row = next(csv.reader(io.StringIO(log.call_args.args[0])))
-        self.assertEqual(len(row), 6)
-        self.assertEqual(row[3], 'Engineer, "Platform"')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory, 'raw.csv')
+            writer = RawCsvWriter(str(path))
+            provider.sinks.append(writer)
+            self.assertTrue(provider.log_results(record))
+            self.assertFalse(provider.log_results(record))
+            writer.close()
+            with path.open(newline='', encoding='utf-8') as handle:
+                rows = list(csv.reader(handle))
+        self.assertEqual(rows[0], ['Datetime', 'Search', 'Name', 'Title', 'URL', 'rawText'])
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(len(rows[1]), 6)
+        self.assertEqual(rows[1][1], 'searxng')
+        self.assertEqual(rows[1][3], 'Engineer, "Platform"')
 
     def test_cli_validation(self):
         for flags in (['--search', 'unknown'], ['--search', 'searxng'], ['-t', 'nan'], ['-j', '-1']):

@@ -199,7 +199,8 @@ Alternatively set `$env:SEARXNG_URL = 'http://localhost:8080'`. URLs can include
 deployment subpath or end in `/search`; credentials, queries and fragments are
 rejected. HTTPS verifies certificates. Existing proxy flags are supported.
 
-Live searches produce `names.txt`, raw `names.csv`, and `names.review.csv`.
+Live searches produce `names.txt`, raw `names.csv`, `names.review.csv`,
+`names.jsonl` and `names.run.json` (see the [outputs guide](outputs.md)).
 TXT selects staff/student candidates with usable names; the review CSV preserves
 all candidates and reasons. See [result quality](result-quality.md) for offline
 classification, organization aliases and uncertain results. Raw CSV records the search-result title

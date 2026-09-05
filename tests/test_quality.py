@@ -1,14 +1,17 @@
 import unittest
-from crosslinked.quality import classify, normalize_name
+from crosslinked.models import Candidate, ReviewedCandidate
+from crosslinked.quality import classify, normalize_name, review
 
 
 class QualityTests(unittest.TestCase):
     def check(self, title, expected, **kwargs):
         record = {'name': title.split(' - ')[0], 'text': title, 'url': 'https://www.linkedin.com/in/example'}
         result = classify(record, 'Example University', **kwargs)
-        self.assertEqual(result['classification'], expected, result)
-        self.assertTrue(result['reason'])
-        self.assertEqual(result['text'], title)
+        self.assertIsInstance(result, ReviewedCandidate)
+        self.assertEqual(result.classification, expected, result)
+        self.assertTrue(result.reason)
+        self.assertEqual(result.text, title)
+        self.assertEqual(result.original_name, record['name'])
         return result
 
     def test_current_student(self):
@@ -54,11 +57,28 @@ class QualityTests(unittest.TestCase):
 
     def test_initial_not_expanded(self):
         record = self.check('Jane B. - Lecturer at Example University', 'current_staff_candidate')
-        self.assertTrue(record['name_issue'])
-        self.assertEqual(record['name'], 'jane b.')
+        self.assertTrue(record.name_issue)
+        self.assertEqual(record.name, 'jane b.')
 
     def test_word_boundaries(self):
         self.check('Jane Doe - Lecturer at NotExample University', 'uncertain')
 
     def test_old_other_affiliation_does_not_exclude_target(self):
         self.check('Jane Doe - Lecturer at Example University | Graduate from Other College', 'current_staff_candidate')
+
+    def test_typed_input_and_review_dict(self):
+        candidate = Candidate(name='Dr Jane Doe', text='Dr Jane Doe - Lecturer at Example University',
+                              url='https://www.linkedin.com/in/jane', provider='searxng', observed_at='2026-01-01')
+        reviewed = review([candidate], 'Example University')[0]
+        self.assertEqual(reviewed.classification, 'current_staff_candidate')
+        self.assertEqual(reviewed.provider, 'searxng')
+        data = reviewed.to_dict()
+        self.assertEqual(data['original_name'], 'Dr Jane Doe')
+        self.assertEqual(data['name'], 'jane doe')
+        self.assertEqual(data['observed_at'], '2026-01-01')
+        # Re-reading a review record keeps the original spelling for a second pass.
+        self.assertEqual(Candidate.from_dict(data).name, 'Dr Jane Doe')
+
+    def test_nameless_record_flagged_not_dropped(self):
+        result = classify({'text': 'Lecturer at Example University'}, 'Example University')
+        self.assertTrue(result.name_issue)

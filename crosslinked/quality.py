@@ -1,10 +1,18 @@
 """Conservative, explainable classification of search evidence, not verification."""
-import csv
+from __future__ import annotations
+
 import re
+from typing import Iterable, List, Mapping, Sequence, Union
+
 from unidecode import unidecode
 
+from crosslinked.models import Candidate, ReviewedCandidate
+from crosslinked.output import write_review  # noqa: F401  (kept importable from here)
 
-def normalize_name(value):
+Record = Union[Candidate, Mapping[str, object]]
+
+
+def normalize_name(value: str) -> str:
     name = re.sub(r'\s+', ' ', unidecode(value)).strip()
     name = re.sub(r'^(?:(?:dr|prof|professor|mr|mrs|ms|miss)\.?\s+)+', '', name, flags=re.I)
     # Only strip known qualifications, never arbitrary name components.
@@ -13,27 +21,34 @@ def normalize_name(value):
     return name.strip(' ,').lower()
 
 
-def phrase(value, text):
+def phrase(value: str, text: str) -> bool:
     return bool(re.search(r'(?<!\w)' + re.escape(value.casefold()) + r'(?!\w)', text.casefold()))
 
 
-def classify(record, organization, aliases=(), excluded_orgs=()):
-    out = dict(record)
-    original = record.get('name', '')
+def _candidate(record: Record) -> Candidate:
+    if isinstance(record, Candidate):
+        return record
+    # A nameless record is kept with an empty name so the reviewer flags it.
+    return Candidate.from_dict(record) or Candidate(name='')
+
+
+def classify(record: Record, organization: str, aliases: Sequence[str] = (),
+             excluded_orgs: Sequence[str] = ()) -> ReviewedCandidate:
+    source = _candidate(record)
+    original = source.name
     name = normalize_name(original)
-    text = record.get('text', '')
+    text = source.text
     # Do not infer affiliation from a URL or the query itself.
-    evidence = text or record.get('title', '')
-    out.update(name=name, original_name=original, classification='uncertain',
-               reason='', name_issue='', evidence_status='unverified search evidence')
+    evidence = text or source.title
+    out = ReviewedCandidate(**dict(source.to_dict(), name=name), original_name=original)
     tokens = name.split()
     if len(tokens) < 2 or any(len(t.strip('.')) < 2 for t in (tokens[:1] + tokens[-1:])):
-        out['name_issue'] = 'Incomplete name or initial; manual review required'
+        out.name_issue = 'Incomplete name or initial; manual review required'
     elif not re.fullmatch(r"[a-z]+(?:[-'][a-z]+)*(?: [a-z]+(?:[-'][a-z]+)*)+", name):
-        out['name_issue'] = 'Unresolved punctuation or qualification; manual review required'
+        out.name_issue = 'Unresolved punctuation or qualification; manual review required'
 
-    def decide(category, reason):
-        out.update(classification=category, reason=reason)
+    def decide(category: str, reason: str) -> ReviewedCandidate:
+        out.classification, out.reason = category, reason
         return out
 
     if re.search(r'\b(university|society|club|team|department|school|centre|center|rowing|students.? union)\b', name):
@@ -87,14 +102,6 @@ def classify(record, organization, aliases=(), excluded_orgs=()):
     return decide('uncertain', 'Organization mentioned without an explicit staff/student relationship')
 
 
-def review(records, organization, aliases=(), excluded_orgs=()):
+def review(records: Iterable[Record], organization: str, aliases: Sequence[str] = (),
+           excluded_orgs: Sequence[str] = ()) -> List[ReviewedCandidate]:
     return [classify(r, organization, aliases, excluded_orgs) for r in records]
-
-
-def write_review(path, records):
-    fields = ['original_name', 'name', 'classification', 'reason', 'name_issue',
-              'evidence_status', 'title', 'url', 'text', 'snippet', 'engines', 'observed_at']
-    with open(path, 'w', encoding='utf-8', newline='') as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction='ignore')
-        writer.writeheader()
-        writer.writerows(records)

@@ -37,9 +37,29 @@ class CliIntegrationTests(unittest.TestCase):
             self.assertEqual(rows[0]['original_name'], 'Dr Jane Example')
             self.assertTrue(rows[-1]['name_issue'])
             self.assertEqual(source.read_bytes(), before)
+            with Path(directory, 'reviewed.jsonl').open(encoding='utf-8') as handle:
+                records = [json.loads(line) for line in handle]
+            self.assertEqual([r['classification'] for r in records][:2], ['current_staff_candidate', 'current_student_candidate'])
+            self.assertEqual(records[0]['provider'], 'searxng')
+            summary = json.loads(Path(directory, 'reviewed.run.json').read_text(encoding='utf-8'))
+            self.assertEqual(summary['mode'], 'parse')
+            self.assertEqual(summary['status'], 'complete')
+            self.assertEqual(summary['candidates'], 5)
+            self.assertEqual(summary['selected'], 2)
+            self.assertEqual(summary['classification']['uncertain'], 1)
+            self.assertEqual(summary['providers'], [])
             run = subprocess.run(command + ['--include-uncertain'], cwd=directory, capture_output=True, text=True, timeout=15)
             self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
             self.assertIn('jo.example', Path(directory, 'reviewed.txt').read_text().splitlines())
+            # The JSONL export is itself a valid input for a second pass.
+            command = [sys.executable, str(Path(__file__).resolve().parents[1] / 'crosslinked.py'),
+                       'reviewed.jsonl', '--organization', 'Example University', '-f', '{f}{last}', '-o', 'second']
+            run = subprocess.run(command, cwd=directory, capture_output=True, text=True, timeout=15)
+            self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            self.assertEqual(Path(directory, 'second.txt').read_text().splitlines(), ['jexample', 'sexample'])
+            run = subprocess.run(command[:-2] + ['-o', 'reviewed'], cwd=directory, capture_output=True, text=True, timeout=15)
+            self.assertEqual(run.returncode, 2)
+            self.assertIn('overwrite', run.stderr)
 
     def test_http_to_files_and_failure_exit(self):
         pages = []
@@ -83,10 +103,25 @@ class CliIntegrationTests(unittest.TestCase):
                 self.assertEqual(rows[0]['Search'], 'searxng')
                 self.assertEqual(rows[0]['Name'], 'jane example')
                 self.assertEqual([p['pageno'] for p in pages], [['1'], ['2']])
+                summary = json.loads(Path(directory, 'names.run.json').read_text(encoding='utf-8'))
+                self.assertEqual(summary['mode'], 'search')
+                self.assertEqual(summary['status'], 'complete')
+                self.assertEqual(summary['exit_code'], 0)
+                self.assertEqual(summary['providers'][0]['stop_reason'], 'empty_page')
+                self.assertEqual(summary['providers'][0]['pages'], 2)
+                self.assertEqual(summary['providers'][0]['records'], 1)
+                self.assertEqual(sorted(summary['outputs']), ['jsonl', 'raw_csv', 'review_csv', 'run_json', 'txt'])
+                self.assertEqual(json.loads(Path(directory, 'names.jsonl').read_text(encoding='utf-8'))['url'],
+                                 'https://www.linkedin.com/in/jane-example')
                 run = subprocess.run(command + ['Failure'], cwd=directory, capture_output=True, text=True, timeout=15)
                 self.assertEqual(run.returncode, 1, run.stdout + run.stderr)
                 self.assertIn('HTTP 403', run.stdout)
                 self.assertNotIn('No results found', run.stdout)
+                summary = json.loads(Path(directory, 'names.run.json').read_text(encoding='utf-8'))
+                self.assertEqual(summary['status'], 'failed')
+                self.assertEqual(summary['providers'][0]['stop_reason'], 'request_failure')
+                self.assertTrue(summary['providers'][0]['warnings'])
+                self.assertEqual(Path(directory, 'names.txt').read_text(), '')
         finally:
             server.shutdown()
             server.server_close()

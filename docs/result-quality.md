@@ -14,9 +14,11 @@ python crosslinked.py names.csv \
   -f '{first}.{last}' -o newcastle_review
 ```
 
-This preserves `names.csv`, writes `newcastle_review.review.csv`, and writes the
+This preserves `names.csv`, writes `newcastle_review.review.csv`,
+`newcastle_review.jsonl` and `newcastle_review.run.json`, and writes the
 selected names to `newcastle_review.txt`. Parse mode no longer creates an empty
-raw CSV. Keep different output prefixes for separate reviews.
+raw CSV. Keep different output prefixes for separate reviews. A JSONL or review
+CSV export can be passed back in the same way; see the [outputs guide](outputs.md).
 
 Without `--organization`, CSV mode remains a name-reformatting operation; it does
 not classify affiliations. Names are normalized in either mode.
@@ -54,7 +56,7 @@ not expanded. Incomplete names and unresolved punctuation/credentials are flagge
 in `name_issue` and excluded from classified TXT exports.
 
 The review retains original and normalized names, classification, reason, name
-issues, profile URL, title, and observation time when supplied. New SearXNG runs
+issues, profile URL, title, provider, and observation time when supplied. New SearXNG runs
 also retain snippets and upstream engine attribution. Existing CSV files cannot
 recover snippets or engine attribution that were never saved.
 
