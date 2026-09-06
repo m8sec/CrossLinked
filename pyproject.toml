@@ -2,10 +2,11 @@
 name = "crosslinked"
 version = "0.3.0"
 license = "GPL-3.0"
-authors = ["m8sec"]
+authors = ["a7t0fwa7"]
+maintainers = ["a7t0fwa7"]
 description = "Linkedin enumeration through search engine scraping"
-repository = "https://github.com/m8sec/CrossLinked"
-homepage = "https://github.com/m8sec/CrossLinked"
+repository = "https://github.com/a7t0fwa7/CrossLinked"
+homepage = "https://github.com/a7t0fwa7/CrossLinked"
 packages = [
     { include = "crosslinked"}
 ]

@@ -1,16 +1,17 @@
 from setuptools import setup, find_packages
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name='crosslinked',
     version='0.3.0',
-    author='m8sec',
+    author='a7t0fwa7',
+    maintainer='a7t0fwa7',
     license='GPLv3',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://github.com/m8sec/CrossLinked',
+    url='https://github.com/a7t0fwa7/CrossLinked',
     packages=find_packages(include=[
         "crosslinked", "crosslinked.*"
     ]),

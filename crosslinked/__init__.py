@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# Author: @m8sec
+# Maintainer: @a7t0fwa7 (https://github.com/a7t0fwa7/CrossLinked)
+# Original author: @m8sec (https://github.com/m8sec/CrossLinked)
 # License: GPLv3
 from __future__ import annotations
 
@@ -38,7 +39,7 @@ def banner():
      \____/_|  \___/|___/___/\_____/_|_| |_|_|\_\___|\__,_| {}
 
     '''.format(highlight('x', fg='gray'),
-               highlight("@m8sec", fg='gray'),
+               highlight("@a7t0fwa7", fg='gray'),
                highlight(VERSION, fg='blue')))
 
 
