@@ -60,34 +60,3 @@ def setup_debug_logger():
     root_logger.addHandler(streamHandler)
     root_logger.setLevel(logging.DEBUG)
     return root_logger
-
-
-def setup_file_logger(file_name, log_name='cLinked_file', file_mode='w'):
-    formatter = logging.Formatter('%(message)s')
-    fileHandler = logging.FileHandler(file_name, file_mode)
-    fileHandler.setFormatter(formatter)
-
-    logger = logging.getLogger(log_name)
-    logger.propagate = False
-    logger.addHandler(fileHandler)
-    logger.setLevel(logging.INFO)
-    if not os.path.getsize(file_name) and file_name.endswith('.csv'):
-        first_run(logger)
-    return logger
-
-
-def first_run(logger):
-    # init headings in CSV log file
-    logger.info('Datetime,Search,Name,Title,URL,rawText')
-
-
-def setup_cli_logger(log_level=logging.INFO, logger_name='cLinked'):
-    formatter = logging.Formatter('%(message)s')
-    StreamHandler = logging.StreamHandler(sys.stdout)
-    StreamHandler.setFormatter(formatter)
-
-    logger = logging.getLogger(logger_name)
-    logger.propagate = False
-    logger.addHandler(StreamHandler)
-    logger.setLevel(log_level)
-    return logger

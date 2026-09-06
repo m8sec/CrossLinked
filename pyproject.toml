@@ -2,10 +2,11 @@
 name = "crosslinked"
 version = "0.3.0"
 license = "GPL-3.0"
-authors = ["m8sec"]
+authors = ["a7t0fwa7"]
+maintainers = ["a7t0fwa7"]
 description = "Linkedin enumeration through search engine scraping"
-repository = "https://github.com/m8sec/CrossLinked"
-homepage = "https://github.com/m8sec/CrossLinked"
+repository = "https://github.com/a7t0fwa7/CrossLinked"
+homepage = "https://github.com/a7t0fwa7/CrossLinked"
 packages = [
     { include = "crosslinked"}
 ]
@@ -31,3 +32,10 @@ urllib3 = "^2.0.7"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+files = ["crosslinked"]
+python_version = "3.10"
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true
