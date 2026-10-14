@@ -53,6 +53,15 @@ cd crosslinked
 pip3 install .
 ```
 
+### OTinstaller
+On Linux, you can also use [OTinstaller](https://github.com/OSINTVerseHQ/OTinstaller), a third-party tool manager that installs the PyPi release into its own virtualenv. It isn't maintained by the CrossLinked authors, so please report problems with it [on the OTinstaller tracker](https://github.com/OSINTVerseHQ/OTinstaller/issues).
+```bash
+pipx install otinstaller
+otinstaller init
+otinstaller install crosslinked
+otinstaller run crosslinked -- -f '{first}.{last}@domain.com' company_name   # same as crosslinked -f '{first}.{last}@domain.com' company_name
+```
+
 # Prerequisites
 CrossLinked assumes the organization's account naming convention has already been identified. This is required for execution and should be added to the CMD args based on your expected output. See the [Naming Format](#naming-format) and [Example Usage](#example-usage) sections below:
 
